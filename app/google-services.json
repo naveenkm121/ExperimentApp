@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346902010302",
+    "project_id": "experimentapp-eb5ca",
+    "storage_bucket": "experimentapp-eb5ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346902010302:android:087669867c34ceeeee81ef",
+        "android_client_info": {
+          "package_name": "com.ecommerce.experimentapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjAGtFssmLmZoEn77hpJIgyO-O8-6qL3s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

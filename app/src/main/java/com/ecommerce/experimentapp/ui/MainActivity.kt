@@ -1,0 +1,112 @@
+package com.ecommerce.experimentapp.ui
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.util.Log
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import android.view.Menu
+import android.view.MenuItem
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.ecommerce.experimentapp.R
+import com.ecommerce.experimentapp.databinding.ActivityMainBinding
+import com.ecommerce.experimentapp.service.CameraService
+import com.google.firebase.messaging.FirebaseMessaging
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
+
+        requestPermissions()
+        initializeFirebase()
+        handleIntent(intent) // Handle any intent that started this activity
+        Log.d("startCameraService", "CameraActivity started 322")
+
+    }
+
+
+    private fun requestPermissions() {
+        val permissions = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+        if (!permissionsGranted(permissions)) {
+            ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE)
+        } else {
+          //  startCameraService()
+        }
+    }
+
+    private fun permissionsGranted(permissions: Array<String>): Boolean {
+        return permissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        intent?.let {
+            if (it.hasExtra("start_service") && it.getStringExtra("start_service") == "true") {
+                startCameraService()
+            }
+        }
+    }
+
+    private fun startCameraService() {
+        val intent = Intent(this, CameraService::class.java)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.d("startCameraService", "CameraActivity started 11")
+            startForegroundService(intent)
+        } else {
+            Log.d("startCameraService", "CameraActivity started 22")
+            startService(intent)
+
+        }
+    }
+
+    private fun initializeFirebase() {
+        // Get FCM token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("MainActivity", "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+            Log.d("MainActivity", "FCM Token: $token")
+            // Send token to your server or use it as needed
+        }
+
+/*        // Optionally, subscribe to a topic
+        FirebaseMessaging.getInstance().subscribeToTopic("news")
+            .addOnCompleteListener { task ->
+                var msg = "Subscribed to topic"
+                if (!task.isSuccessful) {
+                    msg = "Subscription failed"
+                }
+                Log.d("MainActivity", msg)
+            }*/
+    }
+
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
+    }
+
+
+}
