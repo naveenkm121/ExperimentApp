@@ -41,7 +41,10 @@ class CameraService : Service() {
         private const val CHANNEL_ID = "CameraServiceChannel"
         private const val NOTIFICATION_ID = 1234
         private const val DELAY_MILLIS = 2000L // 5 seconds delay
+        private const val CAMERA_FRONT = 0
+        private const val CAMERA_BACK = 1
     }
+
 
     private lateinit var cameraDevice: CameraDevice
     private lateinit var cameraCaptureSessions: CameraCaptureSession
@@ -49,6 +52,7 @@ class CameraService : Service() {
     private lateinit var imageReader: ImageReader
     private lateinit var backgroundHandler: Handler
     private lateinit var backgroundThread: HandlerThread
+    private var cameraType = CAMERA_FRONT
 
     override fun onCreate() {
         super.onCreate()
@@ -62,9 +66,11 @@ class CameraService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        // Get camera type (front/back) from intent
+        cameraType = intent?.getIntExtra("cameraType", CAMERA_FRONT) ?: CAMERA_FRONT
 
         startForegroundService()
-        Log.d("CameraService", "onStartCommand triggered")
+        Log.d("CameraService", "onStartCommand triggered with camera type: $cameraType")
         return START_STICKY
     }
 
@@ -88,20 +94,25 @@ class CameraService : Service() {
         val manager = getSystemService(CAMERA_SERVICE) as CameraManager
         try {
             // Loop through available cameras and find the front-facing camera
-            var frontCameraId: String? = null
+            var selectedCameraId: String? = null
             for (cameraId in manager.cameraIdList) {
                 val characteristics = manager.getCameraCharacteristics(cameraId)
                 val cameraFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
-                if (cameraFacing != null && cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
-                    frontCameraId = cameraId
+
+                if (cameraFacing != null && cameraType == CAMERA_FRONT && cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+                    selectedCameraId = cameraId
+                    break
+                } else if (cameraFacing != null && cameraType == CAMERA_BACK && cameraFacing == CameraCharacteristics.LENS_FACING_BACK) {
+                    selectedCameraId = cameraId
                     break
                 }
+
             }
 
-            if (frontCameraId != null) {
-                manager.openCamera(frontCameraId, stateCallback, backgroundHandler)
+            if (selectedCameraId != null) {
+                manager.openCamera(selectedCameraId, stateCallback, backgroundHandler)
             } else {
-                Log.e("CameraService", "No front-facing camera found.")
+                Log.e("CameraService", "No camera found.")
             }
         } catch (e: Exception) {
             Log.e("CameraService", "Camera open error: ${e.message}")
