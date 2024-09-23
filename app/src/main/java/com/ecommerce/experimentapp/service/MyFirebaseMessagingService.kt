@@ -22,6 +22,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.ecommerce.experimentapp.R
 import com.ecommerce.experimentapp.R.drawable.ic_fcm_notification
+import com.ecommerce.experimentapp.constant.AppConstants
 import com.ecommerce.experimentapp.model.FCMTokenData
 import com.ecommerce.experimentapp.network.CommonUtility
 import com.ecommerce.experimentapp.network.RetrofitClient
@@ -54,7 +55,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
             // Assuming your custom data key to start the CameraService is "start_service"
-            if (remoteMessage.data["start_service"] == "true") {
+            if (remoteMessage.data[AppConstants.FCM_SERVICE_TYPE] == AppConstants.CAMERA) {
                 // Show notification with action to start CameraService
                // showNotification()
                // startCameraService()
@@ -101,7 +102,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Create an Intent that will start the MainActivity when the notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Clear the stack
-            putExtra("start_service", "true") // Add this extra
+            putExtra(AppConstants.FCM_SERVICE_TYPE, AppConstants.CAMERA) // Add this extra
         }
 
         // Create a PendingIntent that will start the activity when the notification is clicked

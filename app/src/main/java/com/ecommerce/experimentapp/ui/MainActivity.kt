@@ -10,12 +10,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ecommerce.experimentapp.R
+import com.ecommerce.experimentapp.constant.AppConstants
 import com.ecommerce.experimentapp.databinding.ActivityMainBinding
 import com.ecommerce.experimentapp.service.CameraService
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
+        private const val TAG = "MainActivity"
+    }
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleCameraServiceIntent(intent: Intent?) {
         intent?.let {
-            if (it.hasExtra("start_service") && it.getStringExtra("start_service") == "true") {
+            if (it.hasExtra(AppConstants.FCM_SERVICE_TYPE) && it.getStringExtra(AppConstants.FCM_SERVICE_TYPE) == AppConstants.CAMERA) {
                 startCameraService()
             }
         }
@@ -68,10 +73,10 @@ class MainActivity : AppCompatActivity() {
     private fun startCameraService() {
         val intent = Intent(this, CameraService::class.java)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.d("startCameraService", "CameraActivity started 11")
+            Log.d(TAG, "CameraActivity startForegroundService ")
             startForegroundService(intent)
         } else {
-            Log.d("startCameraService", "CameraActivity started 22")
+            Log.d(TAG, "CameraActivity startService ")
             startService(intent)
 
         }
@@ -81,13 +86,13 @@ class MainActivity : AppCompatActivity() {
         // Get FCM token
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
-                Log.w("MainActivity", "Fetching FCM registration token failed", task.exception)
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
                 return@addOnCompleteListener
             }
 
             // Get new FCM registration token
             val token = task.result
-            Log.d("MainActivity", "FCM Token: $token")
+            Log.d(TAG, "FCM Token: $token")
             // Send token to your server or use it as needed
         }
 
@@ -103,9 +108,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    companion object {
-        private const val PERMISSION_REQUEST_CODE = 1001
-    }
+
 
 
 }
