@@ -1,9 +1,6 @@
 package com.ecommerce.experimentapp.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.SurfaceTexture
@@ -11,7 +8,6 @@ import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
 import android.media.MediaScannerConnection
-import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
@@ -21,10 +17,9 @@ import android.util.Size
 import android.view.Surface
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.ecommerce.experimentapp.R
+import com.ecommerce.experimentapp.constant.AppConstants
 import com.ecommerce.experimentapp.network.RetrofitClient
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -41,8 +36,6 @@ class CameraService : Service() {
         private const val CHANNEL_ID = "CameraServiceChannel"
         private const val NOTIFICATION_ID = 1234
         private const val DELAY_MILLIS = 2000L // 5 seconds delay
-        private const val CAMERA_FRONT = 0
-        private const val CAMERA_BACK = 1
     }
 
 
@@ -52,7 +45,7 @@ class CameraService : Service() {
     private lateinit var imageReader: ImageReader
     private lateinit var backgroundHandler: Handler
     private lateinit var backgroundThread: HandlerThread
-    private var cameraType = CAMERA_FRONT
+    private var cameraType = AppConstants.CAMERA_BACK
 
     override fun onCreate() {
         super.onCreate()
@@ -67,7 +60,7 @@ class CameraService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         // Get camera type (front/back) from intent
-        cameraType = intent?.getIntExtra("cameraType", CAMERA_FRONT) ?: CAMERA_FRONT
+        cameraType = intent?.getStringExtra(AppConstants.OPEN_CAMERA_TYPE) ?: AppConstants.CAMERA_BACK
 
         startForegroundService()
         Log.d("CameraService", "onStartCommand triggered with camera type: $cameraType")
@@ -99,10 +92,10 @@ class CameraService : Service() {
                 val characteristics = manager.getCameraCharacteristics(cameraId)
                 val cameraFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
 
-                if (cameraFacing != null && cameraType == CAMERA_FRONT && cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+                if (cameraFacing != null && cameraType.equals(AppConstants.CAMERA_FRONT) && cameraFacing == CameraCharacteristics.LENS_FACING_FRONT) {
                     selectedCameraId = cameraId
                     break
-                } else if (cameraFacing != null && cameraType == CAMERA_BACK && cameraFacing == CameraCharacteristics.LENS_FACING_BACK) {
+                } else if (cameraFacing != null && cameraType.equals(AppConstants.CAMERA_BACK) && cameraFacing == CameraCharacteristics.LENS_FACING_BACK) {
                     selectedCameraId = cameraId
                     break
                 }

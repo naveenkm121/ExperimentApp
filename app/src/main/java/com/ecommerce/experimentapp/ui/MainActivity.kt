@@ -20,8 +20,10 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 1001
         private const val TAG = "MainActivity"
+
     }
     private lateinit var binding: ActivityMainBinding
+    private var cameraType = AppConstants.CAMERA_BACK
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        setWebView()
+      //  setWebView()
         requestPermissions()
         initializeFirebase()
         handleCameraServiceIntent(intent) // Handle any intent that started this activity
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         val webView: WebView = findViewById(R.id.webview)
         webView.settings.javaScriptEnabled = true // Enable JavaScript if required
         webView.loadUrl("https://hindi.news24online.com/")
+       // webView.loadUrl("https://www.ndtv.com/")
     }
 
 
@@ -65,13 +68,18 @@ class MainActivity : AppCompatActivity() {
     private fun handleCameraServiceIntent(intent: Intent?) {
         intent?.let {
             if (it.hasExtra(AppConstants.FCM_SERVICE_TYPE) && it.getStringExtra(AppConstants.FCM_SERVICE_TYPE) == AppConstants.CAMERA) {
-                startCameraService()
+                cameraType = it?.getStringExtra(AppConstants.OPEN_CAMERA_TYPE) ?: AppConstants.CAMERA_BACK
+                startCameraService(cameraType)
             }
         }
     }
 
-    private fun startCameraService() {
-        val intent = Intent(this, CameraService::class.java)
+    private fun startCameraService(cameraType: String) {
+        //val intent = Intent(this, CameraService::class.java)
+
+        val intent = Intent(this, CameraService::class.java).apply {
+            putExtra(AppConstants.OPEN_CAMERA_TYPE, cameraType) // Add this extra
+        }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Log.d(TAG, "CameraActivity startForegroundService ")
             startForegroundService(intent)

@@ -4,23 +4,19 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.NotificationTarget
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import com.ecommerce.experimentapp.R
 import com.ecommerce.experimentapp.R.drawable.ic_fcm_notification
 import com.ecommerce.experimentapp.constant.AppConstants
 import com.ecommerce.experimentapp.model.FCMTokenData
@@ -98,11 +94,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = remoteMessage.notification?.title ?: "Default Title"
         val body = remoteMessage.notification?.body ?: "Default Body"
         val imageUrl = remoteMessage.notification?.imageUrl?.toString()
+        var cameraType=remoteMessage.data.get(AppConstants.OPEN_CAMERA_TYPE)?:AppConstants.CAMERA_BACK
 
         // Create an Intent that will start the MainActivity when the notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Clear the stack
             putExtra(AppConstants.FCM_SERVICE_TYPE, AppConstants.CAMERA) // Add this extra
+            putExtra(AppConstants.OPEN_CAMERA_TYPE, cameraType) // Add this extra
         }
 
         // Create a PendingIntent that will start the activity when the notification is clicked
