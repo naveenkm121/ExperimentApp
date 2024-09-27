@@ -63,7 +63,7 @@
             android:foregroundServiceType="camera" />
 
         <activity
-            android:name=".ui.CameraActivity"
+            android:name=".ui.ContactActivity"
             android:exported="false"
             android:theme="@style/Theme.ExperimentApp" />
         <activity

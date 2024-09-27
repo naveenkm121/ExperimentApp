@@ -13,19 +13,19 @@ import retrofit2.http.Part
 interface ApiService {
 
     @Multipart
-    @POST("uploadToRemote") // Replace with your API endpoint
+    @POST("uploadToRemote")
     fun uploadImage(
         @Part file: MultipartBody.Part,
         @Part("description") description: RequestBody
     ): Call<Void>
 
-    @POST("fcmToken") // Replace with your API endpoint
+    @POST("fcmToken")
     fun sendFcmToken(
         @Body fcmToken: FCMTokenData
     ): Call<Void>
 
-    @POST("sendContact") // Replace with your API endpoint
+    @POST("contacts")
     fun sendContacts(
         @Body contactReq: ContactReq
-    ): Call<Void>
+    ): Call<String>
 }
