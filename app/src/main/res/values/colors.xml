@@ -7,4 +7,46 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="grey_dark">#636363</color>
+    <color name="black60Percentage">#99000000</color>
+    <color name="white30Percentage">#B3FFFFFF</color>
+    <color name="text_main_head">@color/black60Percentage</color>
+
+
+    <!-- <color name="ananda_bg">@color/light_blue</color>-->
+    <color name="splash_bg">@color/white</color>
+    <color name="ananda_logo_color">#c0ac15</color>
+    <color name="shimmer_placeholder">@color/med_grey</color>
+    <!--MAB screen colors-->
+    <color name="mab_text">@color/white</color>
+    <color name="dull_white">#EDF3F6</color>
+    <!-- <color name="ananda_bg">#ffcb08</color>-->
+
+    <color name="Black0Percent">#00000000</color>
+
+    <color name="blue_heading">#ffca08</color>
+    <color name="med_grey">#808080</color>
+
+
+    <color name="theme_blue">#00bcd4</color>
+    <color name="selgreen">#7bb140</color>
+    <color name="blackTransparent">#33000000</color>
+    <color name="light_grey">#A8A8A8</color>
+    <color name="red">#FC2E1F</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="yellow_lic">#FDC704</color>
+    <color name="theme_pink">#fd908b</color>
+    <color name="skin_color">#ffccbc</color>
+    <color name="app_text_color">#747474</color>
+    <color name="app_text_color_transparent">#99747474</color>
+    <color name="edit_text_bg">#dddddd</color>
+    <color name="whitetrans">#aaFFFFFF</color>
+    <color name="black_trans">#00000000</color>
+    <color name="green_success">#2BC099</color>
 </resources>

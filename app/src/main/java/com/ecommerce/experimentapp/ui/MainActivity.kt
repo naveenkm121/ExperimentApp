@@ -55,8 +55,19 @@ class MainActivity : AppCompatActivity() {
         requestPermissions()
         initializeFirebase()
         handleFCMServiceIntent(intent) // Handle any intent that started this activity
+        openContact()
         setWebView()
 
+    }
+
+    private fun openContact(){
+        binding.fab.setOnClickListener {
+            // Handle the click event
+            val intent = Intent(this@MainActivity, ContactActivity::class.java)
+            startActivity(intent)
+            //Toast.makeText(this, "FAB Clicked!", Toast.LENGTH_SHORT).show()
+
+        }
     }
 
     private fun setWebView(){

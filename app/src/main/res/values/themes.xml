@@ -1,9 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+     Base application theme.
     <style name="Base.Theme.ExperimentApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.ExperimentApp" parent="Base.Theme.ExperimentApp" />
+
+   <!-- <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        &lt;!&ndash; Primary theme colors &ndash;&gt;
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>  &lt;!&ndash; For status bar &ndash;&gt;
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>  &lt;!&ndash; Status bar color &ndash;&gt;
+        <item name="android:windowLightStatusBar">false</item>  &lt;!&ndash; White status bar icons &ndash;&gt;
+    </style>-->
 </resources>
