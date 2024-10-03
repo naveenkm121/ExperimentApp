@@ -12,6 +12,7 @@ class AppConstants {
         const val CAMERA_BACK= "camera_back"
         const val CAMERA="camera"
         const val CONTACTS="contacts"
+        const val ADMIN_DEVICE="f7fd6b57471220e0"
     }
 
 

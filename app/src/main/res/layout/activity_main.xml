@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
          android:layout_margin="16dp"
-        android:src="@android:drawable/btn_plus"
+        android:src="@drawable/baseline_search_24_white"
         android:contentDescription="Add Button"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white"/>  <!-- Icon color -->
